@@ -65,13 +65,14 @@ export async function getProjectDetails(id: string) {
     client.from("progress_updates").select("id, project_code, progress, remarks, update_date, latitude, longitude, created_at").eq("project_code", projectCode).order("update_date", { ascending: false }).limit(10),
     client.from("alerts").select("id, project_code, severity, title, description, created_at").eq("project_code", projectCode).order("created_at", { ascending: false }).limit(10),
   ]);
-  const error = milestonesResult.error ?? updatesResult.error ?? alertsResult.error;
+  const error = milestonesResult.error ?? updatesResult.error;
 
   return {
     project: projectResult.data,
     milestones: milestonesResult.data ?? [],
     updates: updatesResult.data ?? [],
     alerts: alertsResult.data ?? [],
+    alertsError: alertsResult.error ? `Supabase query failed: ${alertsResult.error.message}` : null,
     error: error ? `Supabase query failed: ${error.message}` : null,
   };
 }
