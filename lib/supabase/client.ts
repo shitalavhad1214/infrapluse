@@ -1,9 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/database.types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-let supabase: ReturnType<typeof createClient> | null = null;
+let supabaseClient: ReturnType<typeof createClient<Database>> | null = null;
 
 export function getSupabaseClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
@@ -12,9 +13,11 @@ export function getSupabaseClient() {
     );
   }
 
-  if (!supabase) {
-    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  if (!supabaseClient) {
+    supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
   }
 
-  return supabase;
+  return supabaseClient;
 }
+
+export const supabase = getSupabaseClient();
