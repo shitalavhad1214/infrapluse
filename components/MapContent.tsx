@@ -229,17 +229,24 @@ const filteredProjects = projects.filter((project) => {
       </div>
 
       {/* Map Container */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         <MapContainer
           center={center}
           zoom={5}
           style={{ height: "100%", width: "100%" }}
           className="z-0"
         >
-          <TileLayer
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-          />
+          {/* Satellite base layer */}
+<TileLayer
+  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+  attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+/>
+
+{/* Road & label overlay on top */}
+<TileLayer
+  url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+  attribution="Labels &copy; Esri"
+/>
           {Object.keys(icons).length > 0 &&
             filteredProjects.map(
               (project) =>
@@ -325,7 +332,24 @@ const filteredProjects = projects.filter((project) => {
                   </Marker>
                 )
             )}
-        </MapContainer>
+                </MapContainer>
+
+        {/* Map Legend */}
+        <div className="absolute bottom-6 right-4 bg-white rounded-lg shadow-md p-3 z-[1000] text-xs">
+          <p className="font-semibold text-gray-800 mb-2">Map Legend</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+            <span className="text-gray-700">On Track</span>
+          </div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-3 h-3 rounded-full bg-orange-500 inline-block"></span>
+            <span className="text-gray-700">At Risk</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+            <span className="text-gray-700">Delayed</span>
+          </div>
+        </div>
       </div>
     </div>
   );
