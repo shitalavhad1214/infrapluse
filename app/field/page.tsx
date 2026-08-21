@@ -117,10 +117,19 @@ export default function FieldProgressPage() {
           latitude: coordinates?.latitude ?? null,
           longitude: coordinates?.longitude ?? null,
         };
-        const { error } = await client.from("progress_updates").insert(progressUpdate);
+        const { error: progressInsertError } = await client.from("progress_updates").insert(progressUpdate);
 
-        if (error) {
-          throw new Error(error.message);
+        if (progressInsertError) {
+          throw new Error(progressInsertError.message);
+        }
+
+        const { error: projectUpdateError } = await client
+          .from("projects")
+          .update({ progress: numericProgress })
+          .eq("id", selectedProject.id);
+
+        if (projectUpdateError) {
+          throw new Error(`Progress history was saved, but the current project progress could not be updated: ${projectUpdateError.message}`);
         }
 
         setSelectedCode("");
@@ -187,7 +196,7 @@ export default function FieldProgressPage() {
             <div>
               {validationError && <p className="mb-3 text-sm font-semibold text-[#b04c73]" role="alert">{validationError}</p>}
               {submissionError && <p className="mb-3 text-sm font-semibold text-[#b04c73]" role="alert">{submissionError}</p>}
-              {submissionSuccess && <p className="mb-3 text-sm font-semibold text-[#36785b]" role="status">✓ Progress update submitted successfully.</p>}
+              {submissionSuccess && <p className="mb-3 text-sm font-semibold text-[#36785b]" role="status">Progress update submitted successfully.</p>}
               <button className="min-h-12 w-full rounded-md border border-[#7549c1] bg-white px-5 py-3 text-sm font-bold text-[#7549c1] transition hover:bg-[#fbf8ff] disabled:cursor-wait disabled:opacity-60" type="submit" disabled={saving}>{saving ? "Submitting..." : "Submit Progress Update"}</button>
             </div>
           </>}
