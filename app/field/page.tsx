@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import type { ProjectRow } from "@/lib/database.types";
+import type { ProgressUpdateRow, ProjectRow } from "@/lib/database.types";
 import { getProjects } from "@/lib/projects";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
@@ -15,6 +15,11 @@ const inputClass = "w-full rounded-md border border-[#e5dbf3] bg-white px-4 py-3
 
 function displayValue(value: string | number | null | undefined) {
   return value === null || value === undefined || value === "" ? "Not available" : String(value);
+}
+
+function formatUpdateDate(value: string | null) {
+  if (!value) return "Date unavailable";
+  return new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 }
 
 export default function FieldProgressPage() {
@@ -31,6 +36,10 @@ export default function FieldProgressPage() {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [recentUpdates, setRecentUpdates] = useState<ProgressUpdateRow[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [client] = useState(() => createSupabaseServerClient());
 
   useEffect(() => {
     let active = true;
@@ -50,6 +59,49 @@ export default function FieldProgressPage() {
   }, []);
 
   const selectedProject = projects.find((project) => project.project_code === selectedCode);
+
+  useEffect(() => {
+    let active = true;
+    setRecentUpdates([]);
+    setHistoryError(null);
+
+    if (!selectedProject) {
+      setHistoryLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    const selectedProjectId = selectedProject.id;
+    setHistoryLoading(true);
+    async function loadRecentUpdates() {
+      if (!client) {
+        if (active) {
+          setHistoryError("Supabase is not configured. Add the required variables to .env.local.");
+          setHistoryLoading(false);
+        }
+        return;
+      }
+
+      const { data, error } = await client
+        .from("progress_updates")
+        .select("id, project_id, project_code, progress, remarks, update_date, latitude, longitude, created_at")
+        .eq("project_id", selectedProjectId)
+        .order("update_date", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (!active) return;
+      setRecentUpdates(data ?? []);
+      setHistoryError(error ? `Could not load recent progress updates: ${error.message}` : null);
+      setHistoryLoading(false);
+    }
+
+    loadRecentUpdates();
+    return () => {
+      active = false;
+    };
+  }, [client, selectedProject?.id]);
 
   function selectProject(value: string) {
     setSelectedCode(value);
@@ -103,7 +155,6 @@ export default function FieldProgressPage() {
       setSaving(true);
 
       try {
-        const client = createSupabaseServerClient();
         if (!client) {
           throw new Error("Supabase is not configured. Add the required variables to .env.local.");
         }
@@ -132,7 +183,16 @@ export default function FieldProgressPage() {
           throw new Error(`Progress history was saved, but the current project progress could not be updated: ${projectUpdateError.message}`);
         }
 
-        setSelectedCode("");
+        const { data: refreshedUpdates, error: historyRefreshError } = await client
+          .from("progress_updates")
+          .select("id, project_id, project_code, progress, remarks, update_date, latitude, longitude, created_at")
+          .eq("project_id", selectedProject.id)
+          .order("update_date", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(5);
+        setRecentUpdates(refreshedUpdates ?? []);
+        setHistoryError(historyRefreshError ? `Could not refresh recent progress updates: ${historyRefreshError.message}` : null);
+
         setProgress("");
         setRemarks("");
         setCoordinates(null);
@@ -201,6 +261,18 @@ export default function FieldProgressPage() {
             </div>
           </>}
         </form>
+
+        {selectedProject && <section className="mt-5 rounded-lg border border-[#e8e0f2] bg-white p-5 shadow-[0_8px_25px_rgba(65,33,109,0.05)] sm:p-7" aria-labelledby="history-heading">
+          <div className="mb-5"><h2 id="history-heading" className="text-lg font-bold">Recent Progress Updates</h2><p className="mt-1 text-sm text-[#887b9c]">The five latest updates for this project.</p></div>
+          {historyLoading && <p className="text-sm text-[#887b9c]" role="status">Loading recent progress updates...</p>}
+          {historyError && <p className="text-sm text-[#b04c73]" role="alert">{historyError}</p>}
+          {!historyLoading && !historyError && !recentUpdates.length && <p className="text-sm text-[#887b9c]" role="status">No progress updates yet.</p>}
+          {!historyLoading && !historyError && recentUpdates.length > 0 && <div className="space-y-3">{recentUpdates.map((update) => <article className="rounded-md border border-[#eee8f5] bg-[#fbfaff] p-4" key={update.id}>
+            <div className="flex items-start justify-between gap-4"><strong className="text-xl text-[#7549c1]">{update.progress}%</strong><time className="text-right text-xs text-[#887b9c]">{formatUpdateDate(update.update_date ?? update.created_at)}</time></div>
+            <p className="mt-3 text-sm text-[#4b3765]">{update.remarks ?? "No remarks provided."}</p>
+            <p className="mt-3 text-xs font-semibold text-[#887b9c]">{update.latitude !== null && update.longitude !== null ? "GPS coordinates captured" : "GPS coordinates not captured"}</p>
+          </article>)}</div>}
+        </section>}
       </div>
     </main>
   );
