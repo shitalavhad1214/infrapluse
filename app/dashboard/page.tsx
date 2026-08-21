@@ -112,7 +112,7 @@ export default async function Dashboard() {
       <nav className="sidebar-nav" aria-label="Main navigation">
         <a className="nav-item active" href="/dashboard"><Icon name="chart" />Dashboard</a>
         <a className="nav-item" href="/projects"><Icon name="building" />Projects <span className="nav-count">148</span></a>
-        <a className="nav-item" href="#map"><Icon name="map" />Map</a>
+        <a className="nav-item" href="/map"><Icon name="map" />Map</a>
         <a className="nav-item" href="/alerts"><Icon name="bell" />Alerts <span className="nav-count alert-count">7</span></a>
         <a className="nav-item" href="#field-reports"><Icon name="clipboard" />Field Reports</a>
         <a className="nav-item" href="#analytics"><Icon name="chart" />Analytics</a>

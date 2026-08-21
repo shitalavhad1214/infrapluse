@@ -308,9 +308,9 @@ const filteredProjects = projects.filter((project) => {
                             </p>
                           )}
                                             </div>
-                    {project.project_code ? (
+                    {project.id ? (
                       <a
-                        href={`/projects/${project.project_code}`}
+                        href={`/projects/${project.id}`}
                         className="mt-3 block text-center bg-blue-600 text-white text-xs font-semibold py-2 px-3 rounded hover:bg-blue-700 transition-colors"
                       >
                         View Project
