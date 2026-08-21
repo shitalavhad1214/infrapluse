@@ -27,6 +27,7 @@ export type MilestoneRow = {
 
 export type ProgressUpdateRow = {
   id: string;
+  project_id: string;
   project_code: string | null;
   progress: number;
   remarks: string | null;
