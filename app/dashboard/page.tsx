@@ -46,7 +46,7 @@ async function loadDashboardData() {
   if (!client) return { projects: [] as Project[], alerts: [] as DashboardAlert[], error: "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local." };
 
   const [{ data: projectRows, error: projectsError }, { data: alertRows, error: alertsError }] = await Promise.all([
-    client.from("projects").select("id, project_code, name, sector, location, progress, planned_progress, status, risk_score, risk_level, expected_end_date, description, created_at").order("created_at", { ascending: false }),
+    client.from("projects").select("id, project_code, name, sector, location, district, state, latitude, longitude, progress, planned_progress, status, risk_score, risk_level, start_date, expected_end_date, description, created_at").order("created_at", { ascending: false }),
     client.from("alerts").select("id, project_code, severity, title, description, created_at").order("created_at", { ascending: false }).limit(5),
   ]);
 
@@ -114,7 +114,7 @@ export default async function Dashboard() {
         <a className="nav-item" href="/projects"><Icon name="building" />Projects <span className="nav-count">148</span></a>
         <a className="nav-item" href="/map"><Icon name="map" />Map</a>
         <a className="nav-item" href="/alerts"><Icon name="bell" />Alerts <span className="nav-count alert-count">7</span></a>
-        <a className="nav-item" href="#field-reports"><Icon name="clipboard" />Field Reports</a>
+        <a className="nav-item" href="/field"><Icon name="clipboard" />Field Reports</a>
         <a className="nav-item" href="#analytics"><Icon name="chart" />Analytics</a>
         <a className="nav-item" href="#simulation"><Icon name="activity" />Simulation</a>
         <a className="nav-item" href="#reports"><Icon name="clipboard" />Reports</a>

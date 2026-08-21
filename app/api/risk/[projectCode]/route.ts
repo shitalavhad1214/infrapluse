@@ -78,7 +78,11 @@ export async function GET(
         status: project.status ?? "ON TRACK",
         expected_end_date: project.expected_end_date,
       },
-      milestones ?? []
+      (milestones ?? []).map((milestone) => ({
+        status: milestone.status ?? "UNKNOWN",
+        planned_date: milestone.planned_date,
+        completed_date: milestone.completed_date,
+      }))
     );
 
     return NextResponse.json({

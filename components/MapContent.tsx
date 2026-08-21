@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type * as Leaflet from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Project } from "@/lib/types";
 import { getSupabaseClient } from "@/lib/supabase/client";
@@ -14,7 +15,7 @@ const STATUS_COLORS = {
 };
 
 // Create SVG icon for a specific status
-const createStatusIcon = (L: any, status: string) => {
+const createStatusIcon = (L: typeof Leaflet, status: string) => {
   const color = STATUS_COLORS[status as keyof typeof STATUS_COLORS] || "#6b7280";
   const svgIcon = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="32" height="32">
@@ -38,7 +39,7 @@ export default function MapContent() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [icons, setIcons] = useState<Record<string, any>>({});
+  const [icons, setIcons] = useState<Record<string, Leaflet.Icon>>({});
   
   // Filter state
   const [searchQuery, setSearchQuery] = useState("");

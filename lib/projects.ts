@@ -15,7 +15,7 @@ export async function getProjects() {
 
   const { data, error } = await client
     .from("projects")
-    .select("id, project_code, name, sector, location, progress, planned_progress, status, risk_score, risk_level, expected_end_date, description, created_at")
+    .select("id, project_code, name, sector, location, district, state, latitude, longitude, progress, planned_progress, status, risk_score, risk_level, start_date, expected_end_date, description, created_at")
     .order("created_at", { ascending: false });
 
   return {
@@ -33,7 +33,7 @@ export async function getProject(id: string) {
 
   const { data, error } = await client
     .from("projects")
-    .select("id, project_code, name, sector, location, progress, planned_progress, status, risk_score, risk_level, expected_end_date, description, created_at")
+    .select("id, project_code, name, sector, location, district, state, latitude, longitude, progress, planned_progress, status, risk_score, risk_level, start_date, expected_end_date, description, created_at")
     .eq("id", id)
     .maybeSingle();
 
@@ -51,7 +51,7 @@ export async function getProjectDetails(id: string) {
 
   const projectResult = await client
     .from("projects")
-    .select("id, project_code, name, sector, location, progress, planned_progress, status, risk_score, risk_level, expected_end_date, description, created_at")
+    .select("id, project_code, name, sector, location, district, state, latitude, longitude, progress, planned_progress, status, risk_score, risk_level, start_date, expected_end_date, description, created_at")
     .eq("id", id)
     .maybeSingle();
 

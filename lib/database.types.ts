@@ -4,6 +4,10 @@ export type ProjectRow = {
   name: string;
   sector: string;
   location: string | null;
+  district: string | null;
+  state: string | null;
+  latitude: number | null;
+  longitude: number | null;
   progress: number | null;
   planned_progress: number | null;
   status: string | null;
@@ -11,6 +15,7 @@ export type ProjectRow = {
   risk_level: string | null;
   expected_end_date: string | null;
   description: string | null;
+  start_date: string | null;
   created_at: string | null;
 };
 
